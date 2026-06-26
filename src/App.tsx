@@ -35,12 +35,7 @@ const DEFAULT_SETTINGS: AppSettings = {
   resetHour: 5 // default 5:00 AM
 };
 
-const DEFAULT_HISTORY: ScreenTimeHistory[] = [
-  { date: '어제 (6월 25일)', socialTime: 1200, studyTime: 1500, isGoalAchieved: true },
-  { date: '그저께 (6월 24일)', socialTime: 3600, studyTime: 900, isGoalAchieved: false },
-  { date: '6월 23일', socialTime: 2400, studyTime: 2400, isGoalAchieved: true },
-  { date: '6월 22일', socialTime: 1800, studyTime: 2000, isGoalAchieved: true }
-];
+const DEFAULT_HISTORY: ScreenTimeHistory[] = [];
 
 export default function App() {
   // Load state from localStorage or defaults
@@ -358,7 +353,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 text-zinc-950 flex flex-col justify-center items-center font-sans relative overflow-hidden antialiased p-4 md:p-8">
+    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center font-sans antialiased">
       
       {/* Vibration Indicator */}
       {vibeMessage && (
@@ -371,95 +366,52 @@ export default function App() {
         </div>
       )}
 
-      {/* Centered Phone Column */}
-      <div className="flex flex-col items-center space-y-4">
+      {/* Main app shell: Full height on mobile PWA, beautifully framed on desktop */}
+      <div className="w-full max-w-md min-h-screen md:min-h-[700px] md:my-8 bg-white md:rounded-[32px] md:shadow-2xl border border-zinc-100 relative overflow-hidden flex flex-col shrink-0 select-none">
         
-        {/* Phone Frame container */}
-        <div className="w-80 h-[640px] bg-white rounded-[44px] p-3 shadow-[0_24px_64px_rgba(0,0,0,0.06)] border-[6px] border-zinc-950 relative select-none shrink-0 overflow-hidden">
+        {/* iOS-style Notifications overlay banner inside the app */}
+        <NotificationCenter 
+          notifications={notifications}
+          onNotificationClick={handleNotificationClick}
+          onClearNotification={handleClearNotification}
+        />
+
+        {/* Main Content Area */}
+        <div className="flex-1 relative flex flex-col overflow-hidden">
           
-          {/* Dynamic Island / Active App Notch */}
-          {activeTimer !== 'none' ? (
-            <div className="absolute top-3 w-[164px] h-7 bg-black rounded-full z-50 flex items-center justify-between px-3 text-[8px] font-black text-white border border-zinc-900 shadow-md transition-all duration-300 left-1/2 -translate-x-1/2">
-              <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse bg-rose-500" />
-                <span className="text-zinc-300 font-black uppercase tracking-wider text-[7px] font-space">
-                  {activeTimer === 'instagram' ? 'INSTAGRAM' : activeTimer === 'twitter' ? 'TWITTER' : 'STUDYING'}
-                </span>
+          <ScreenTimeApp 
+            settings={settings}
+            updateSettings={handleUpdateSettings}
+            history={history}
+            secondsUntilReset={secondsUntilReset}
+            activeTimer={activeTimer}
+            setActiveTimer={setActiveTimer}
+          />
+
+          {/* Time-limit warning overlay inside the app when target is exceeded */}
+          {isGoalExceeded && (
+            <div className="absolute inset-0 bg-white/95 backdrop-blur-md z-40 p-6 flex flex-col justify-center items-center text-center space-y-6 animate-fade-in">
+              <div className="w-14 h-14 bg-rose-50 border border-rose-100 text-rose-500 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-8 h-8" />
               </div>
-              <span className="font-outfit text-rose-500 text-[9px] tracking-widest font-bold">
-                {formatDigitalTime(sessionSeconds)}
-              </span>
-            </div>
-          ) : (
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 w-28 h-6 bg-black rounded-full z-50 flex items-center justify-around px-2.5 transition-all duration-300">
-              <div className="w-2 h-2 rounded-full bg-zinc-900" />
-              <div className="w-2 h-2 rounded-full bg-zinc-900" />
+              <div className="space-y-2">
+                <h3 className="text-lg font-black text-zinc-900 font-space">시간 한도 초과</h3>
+                <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">
+                  오늘 허용된 소셜 미디어 시간을 초과했습니다. 공부를 진행하여 잠금을 해제하십시오.
+                </p>
+              </div>
+              <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl w-full max-w-[220px]">
+                <span className="text-[8px] font-black text-rose-600 tracking-wider block uppercase mb-0.5 font-space">남은 영어 공부 시간</span>
+                <span className="text-2xl font-black text-rose-600 font-outfit tracking-widest">{formatDigitalTime(studyDebt)}</span>
+              </div>
+              <p className="text-[9px] text-zinc-400 max-w-[180px]">
+                ※ 상단의 📚 <strong>STUDY DEBT DUE</strong> 카드를 터치하여 공부 시간을 채우고 공부 빚을 줄여보세요!
+              </p>
             </div>
           )}
 
-          {/* Top iOS Header */}
-          <div className="absolute top-3.5 left-6 right-6 z-40 text-zinc-900 font-bold text-[11px] flex justify-between items-center select-none pointer-events-none">
-            <span className="tracking-widest font-space">
-              {simulatedTime.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false })}
-            </span>
-            <div className="flex items-center gap-1">
-              <Signal className="w-3.5 h-3.5 text-zinc-900" />
-              <Wifi className="w-3.5 h-3.5 text-zinc-900" />
-              <Battery className="w-4 h-4 fill-zinc-900 text-zinc-900" />
-            </div>
-          </div>
-
-          {/* iOS Notifications overlay banner */}
-          <NotificationCenter 
-            notifications={notifications}
-            onNotificationClick={handleNotificationClick}
-            onClearNotification={handleClearNotification}
-          />
-
-          {/* Screen Content (Strictly ScreenTimeApp) */}
-          <div className="w-full h-full rounded-[34px] overflow-hidden bg-white border border-zinc-100 relative">
-            
-            <ScreenTimeApp 
-              settings={settings}
-              updateSettings={handleUpdateSettings}
-              history={history}
-              secondsUntilReset={secondsUntilReset}
-              activeTimer={activeTimer}
-              setActiveTimer={setActiveTimer}
-            />
-
-            {/* Time-limit warning overlay inside the phone when target is exceeded */}
-            {isGoalExceeded && (
-              <div className="absolute inset-0 bg-white/95 backdrop-blur-md z-40 p-6 flex flex-col justify-center items-center text-center space-y-6 animate-fade-in">
-                <div className="w-14 h-14 bg-rose-50 border border-rose-100 text-rose-500 rounded-full flex items-center justify-center">
-                  <AlertCircle className="w-8 h-8" />
-                </div>
-                <div className="space-y-2">
-                  <h3 className="text-lg font-black text-zinc-900 font-space">시간 한도 초과</h3>
-                  <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">
-                    오늘 허용된 소셜 미디어 시간을 초과했습니다. 공부를 진행하여 잠금을 해제하십시오.
-                  </p>
-                </div>
-                <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl w-full max-w-[220px]">
-                  <span className="text-[8px] font-black text-rose-600 tracking-wider block uppercase mb-0.5 font-space">남은 영어 공부 시간</span>
-                  <span className="text-2xl font-black text-rose-600 font-outfit tracking-widest">{formatDigitalTime(studyDebt)}</span>
-                </div>
-                <p className="text-[9px] text-zinc-400 max-w-[180px]">
-                  ※ 상단의 📚 <strong>STUDY DEBT DUE</strong> 카드를 터치하여 공부 시간을 채우고 공부 빚을 줄여보세요!
-                </p>
-              </div>
-            )}
-
-          </div>
-
-          {/* Home indicator bar */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-zinc-200 rounded-full cursor-not-allowed z-50" />
         </div>
 
-        {/* Minimal clean footer */}
-        <div className="text-[9px] font-bold text-zinc-300 tracking-widest uppercase font-space">
-          SCREEN DETOX COMPANION
-        </div>
       </div>
 
     </div>

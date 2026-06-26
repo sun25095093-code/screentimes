@@ -36,9 +36,12 @@ export default function ScreenTimeApp({
   const studyDebt = Math.max(0, totalSocialTime - settings.langflixTime);
   const isDebtCleared = studyDebt <= 0;
 
+  // Slice the most recent 6 days and reverse them so that left-to-right goes from oldest to newest (most recent on the right)
+  const displayHistory = [...history].slice(0, 6).reverse();
+
   // Find max value in history to scale the bar chart properly
   const maxHistoryValue = Math.max(
-    ...history.map(d => Math.max(d.socialTime, d.studyTime)),
+    ...displayHistory.map(d => Math.max(d.socialTime, d.studyTime)),
     300 // default minimum peak (5 minutes) for scaling
   );
 
@@ -168,9 +171,6 @@ export default function ScreenTimeApp({
               <div className="text-4xl font-black tracking-tight text-zinc-950 font-outfit select-all leading-none py-1 drop-shadow-sm">
                 {formatDigitalTime(totalSocialTime)}
               </div>
-              <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest inline-block bg-zinc-50 px-2.5 py-1 rounded-md border border-zinc-100 font-space">
-                {Math.floor(totalSocialTime / 3600)}H {Math.floor((totalSocialTime % 3600) / 60)}M {totalSocialTime % 60}S ACTIVE
-              </span>
             </div>
 
             {/* 4. Action Button to Weekly View */}
@@ -218,57 +218,63 @@ export default function ScreenTimeApp({
                 <div className="absolute inset-x-0 top-0 border-t border-zinc-100" />
                 <div className="absolute inset-x-0 top-1/2 border-t border-zinc-100" />
 
-                {/* Daily Bars */}
-                {history.map((day, idx) => {
-                  const socialHeight = Math.max(4, Math.min(80, (day.socialTime / maxHistoryValue) * 80));
-                  const studyHeight = Math.max(4, Math.min(80, (day.studyTime / maxHistoryValue) * 80));
+                {displayHistory.length === 0 ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
+                    <span className="text-[10px] font-bold text-zinc-400">아직 정산된 기록이 없습니다.</span>
+                    <span className="text-[8px] text-zinc-400 mt-1">매일 새벽 5시에 오늘 사용량이 정산되어 차례대로 기록됩니다!</span>
+                  </div>
+                ) : (
+                  displayHistory.map((day, idx) => {
+                    const socialHeight = Math.max(4, Math.min(80, (day.socialTime / maxHistoryValue) * 80));
+                    const studyHeight = Math.max(4, Math.min(80, (day.studyTime / maxHistoryValue) * 80));
 
-                  return (
-                    <div key={idx} className="flex flex-col items-center flex-1 space-y-2">
-                      <div className="flex gap-1 items-end h-20">
-                        
-                        {/* Social Time Bar */}
-                        <div className="group relative">
-                          <div 
-                            className="w-2.5 bg-zinc-300 rounded-t-sm transition-all duration-300 hover:bg-zinc-400 cursor-pointer"
-                            style={{ height: `${socialHeight}px` }}
-                          />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-zinc-950 text-[7px] font-bold text-white px-1.5 py-0.5 rounded whitespace-nowrap z-40 pointer-events-none">
-                            SNS: {Math.round(day.socialTime / 60)}m
+                    return (
+                      <div key={idx} className="flex flex-col items-center flex-1 space-y-2">
+                        <div className="flex gap-1.5 items-end h-20">
+                          
+                          {/* Social Time Bar */}
+                          <div className="group relative">
+                            <div 
+                              className="w-2.5 bg-rose-400 rounded-t-sm transition-all duration-300 hover:bg-rose-500 cursor-pointer"
+                              style={{ height: `${socialHeight}px` }}
+                            />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-zinc-950 text-[7px] font-bold text-white px-1.5 py-0.5 rounded whitespace-nowrap z-40 pointer-events-none">
+                              SNS: {Math.round(day.socialTime / 60)}분
+                            </div>
                           </div>
+
+                          {/* Study Time Bar */}
+                          <div className="group relative">
+                            <div 
+                              className="w-2.5 bg-emerald-500 rounded-t-sm transition-all duration-300 hover:bg-emerald-600 cursor-pointer"
+                              style={{ height: `${studyHeight}px` }}
+                            />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-zinc-950 text-[7px] font-bold text-white px-1.5 py-0.5 rounded whitespace-nowrap z-40 pointer-events-none">
+                              공부: {Math.round(day.studyTime / 60)}분
+                            </div>
+                          </div>
+
                         </div>
 
-                        {/* Study Time Bar */}
-                        <div className="group relative">
-                          <div 
-                            className="w-2.5 bg-zinc-950 rounded-t-sm transition-all duration-300 hover:bg-zinc-800 cursor-pointer"
-                            style={{ height: `${studyHeight}px` }}
-                          />
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block bg-zinc-950 text-[7px] font-bold text-white px-1.5 py-0.5 rounded whitespace-nowrap z-40 pointer-events-none">
-                            공부: {Math.round(day.studyTime / 60)}m
-                          </div>
-                        </div>
-
+                        {/* Day Label */}
+                        <span className="text-[7px] font-extrabold tracking-wider text-zinc-400 uppercase font-space">
+                          {day.date.includes('(') ? day.date.split(' ')[0] : day.date}
+                        </span>
                       </div>
-
-                      {/* Day Label */}
-                      <span className="text-[7px] font-extrabold tracking-wider text-zinc-400 uppercase font-space">
-                        {day.date.includes('(') ? day.date.split(' ')[0] : day.date}
-                      </span>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
 
               </div>
 
               {/* Custom Legend */}
               <div className="flex justify-center gap-4 pt-3 border-t border-zinc-100 text-[8px] font-bold tracking-wider text-zinc-400">
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 bg-zinc-300 rounded-sm" />
+                  <span className="w-2.5 h-2.5 bg-rose-400 rounded-sm" />
                   <span>소셜 미디어 사용</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 bg-zinc-950 rounded-sm" />
+                  <span className="w-2.5 h-2.5 bg-emerald-500 rounded-sm" />
                   <span>영어 공부 (랭플릭스)</span>
                 </div>
               </div>
