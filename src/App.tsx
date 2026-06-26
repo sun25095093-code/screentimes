@@ -386,6 +386,7 @@ export default function App() {
             secondsUntilReset={secondsUntilReset}
             activeTimer={activeTimer}
             setActiveTimer={setActiveTimer}
+            setHistory={setHistory}
           />
 
           {/* Time-limit warning overlay inside the app when target is exceeded */}
