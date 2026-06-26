@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#09090b"/>
+  <!-- Glowing rings representing screentime limitation and focus -->
+  <circle cx="256" cy="256" r="180" fill="none" stroke="#f43f5e" stroke-width="14" opacity="0.25" />
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#10b981" stroke-width="14" opacity="0.25" />
+  
+  <!-- Sleek Book structure for LangFlix -->
+  <path d="M190 230h132c12 0 22 10 22 22v80c0 12-10 22-22 22H190c-12 0-22-10-22-22v-80c0-12 10-22 22-22z" fill="none" stroke="#10b981" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M256 230v124" stroke="#10b981" stroke-width="12" stroke-linecap="round"/>
+  
+  <!-- Elegant Clock for ScreenTime -->
+  <circle cx="256" cy="180" r="50" fill="#09090b" stroke="#f43f5e" stroke-width="18" />
+  <path d="M256 150v30h25" stroke="#f43f5e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

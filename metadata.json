@@ -1,0 +1,6 @@
+{
+  "name": "ScreenTime & LangFlix",
+  "description": "인스타그램과 트위터 사용량을 합산하여 제한하고, 사용한 만큼 영어공부 앱(랭플릭스) 사용을 유도하는 iOS 스크린타임 도우미 시뮬레이터입니다.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
