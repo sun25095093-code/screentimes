@@ -123,7 +123,7 @@ export default function ScreenTimeApp({
 
               {/* 1:1 Langflix Shortcut App Icon */}
               <a
-                href="https://langflix.app"
+                href="https://apps.apple.com/kr/app/%EB%9E%AD%ED%94%8C%EB%A6%AD%EC%8A%A4-%EC%98%81%EC%96%B4%EA%B3%B5%EB%B6%80-%EC%98%81%EC%96%B4%ED%9A%8C%ED%99%94-%EC%98%81%EB%8B%A8%EC%96%B4-%EB%8B%A8%EC%96%B4%EC%9E%A5/id6739905184"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => {
