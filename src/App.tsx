@@ -374,20 +374,60 @@ export default function App() {
     };
   }, [activeTimer]);
 
-  // Run synchronization interval every second when activeTimer is running
+  const workerRef = useRef<Worker | null>(null);
+  const syncTimerRef = useRef(syncTimerWithTimestamp);
+
+  useEffect(() => {
+    syncTimerRef.current = syncTimerWithTimestamp;
+  });
+
+  // Run synchronization interval every second when activeTimer is running (using Web Worker to prevent background throttling)
   useEffect(() => {
     if (activeTimer === 'none') {
       lastSession15MinTriggered.current = 0;
+      if (workerRef.current) {
+        workerRef.current.postMessage('stop');
+        workerRef.current.terminate();
+        workerRef.current = null;
+      }
       return;
     }
 
-    syncTimerWithTimestamp();
+    syncTimerRef.current();
 
-    const interval = setInterval(() => {
-      syncTimerWithTimestamp();
-    }, 1000);
+    if (!workerRef.current) {
+      const blob = new Blob([`
+        let intervalId = null;
+        self.onmessage = function(e) {
+          if (e.data === 'start') {
+            if (intervalId) clearInterval(intervalId);
+            intervalId = setInterval(() => {
+              self.postMessage('tick');
+            }, 1000);
+          } else if (e.data === 'stop') {
+            if (intervalId) {
+              clearInterval(intervalId);
+              intervalId = null;
+            }
+          }
+        };
+      `], { type: 'application/javascript' });
+      
+      workerRef.current = new Worker(URL.createObjectURL(blob));
+      workerRef.current.onmessage = (e) => {
+        if (e.data === 'tick') {
+          syncTimerRef.current();
+        }
+      };
+    }
 
-    return () => clearInterval(interval);
+    workerRef.current.postMessage('start');
+
+    return () => {
+      if (workerRef.current) {
+        workerRef.current.postMessage('stop');
+      }
+    };
   }, [activeTimer]);
 
   // Periodic notifications every 15 mins of combined social media usage
@@ -411,6 +451,35 @@ export default function App() {
     }
   }, [totalSocial, settings.langflixTime]);
 
+  // Synthesizes a loud, piercing triple beep using Web Audio API to alert the user even in background tabs
+  const playWarningBeep = () => {
+    try {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const now = audioCtx.currentTime;
+      
+      // Play 3 high-pitch alert beeps
+      [0, 0.35, 0.7].forEach(delay => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.type = 'sawtooth'; // piercing sawtooth wave
+        osc.frequency.setValueAtTime(880, now + delay); // A5 note
+        
+        // Volume envelope
+        gain.gain.setValueAtTime(0, now + delay);
+        gain.gain.linearRampToValueAtTime(0.4, now + delay + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + delay + 0.25);
+        
+        osc.start(now + delay);
+        osc.stop(now + delay + 0.3);
+      });
+    } catch (e) {
+      console.error("Audio beep synthesis failed:", e);
+    }
+  };
+
   // Utility to send notification
   const sendPushNotification = (title: string, body: string, appName: 'ScreenTime' | 'LangFlix' | 'System') => {
     const newNotif: iOSNotification = {
@@ -423,6 +492,14 @@ export default function App() {
     };
     setNotifications(prev => [newNotif, ...prev]);
     triggerVibration(`🔔 알림: ${title}`);
+
+    // Play alert sound and trigger window.alert popup for ScreenTime warnings
+    if (appName === 'ScreenTime') {
+      playWarningBeep();
+      setTimeout(() => {
+        alert(`[스크린 디톡스 알림]\n\n${title}\n\n${body}`);
+      }, 100);
+    }
     
     // Attempt actual native OS push notification
     if ('Notification' in window && Notification.permission === 'granted') {
@@ -578,28 +655,6 @@ export default function App() {
             activeTimer={activeTimer}
             setActiveTimer={handleSetActiveTimer}
           />
-
-          {/* Time-limit warning overlay inside the app when target is exceeded */}
-          {isGoalExceeded && (
-            <div className="absolute inset-0 bg-white/95 backdrop-blur-md z-40 p-6 flex flex-col justify-center items-center text-center space-y-6 animate-fade-in">
-              <div className="w-14 h-14 bg-rose-50 border border-rose-100 text-rose-500 rounded-full flex items-center justify-center">
-                <AlertCircle className="w-8 h-8" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-lg font-black text-zinc-900 font-space">시간 한도 초과</h3>
-                <p className="text-xs text-zinc-500 leading-relaxed max-w-[200px]">
-                  오늘 허용된 소셜 미디어 시간을 초과했습니다. 공부를 진행하여 잠금을 해제하십시오.
-                </p>
-              </div>
-              <div className="p-3 bg-rose-50 border border-rose-100 rounded-xl w-full max-w-[220px]">
-                <span className="text-[8px] font-black text-rose-600 tracking-wider block uppercase mb-0.5 font-space">남은 영어 공부 시간</span>
-                <span className="text-2xl font-black text-rose-600 font-outfit tracking-widest">{formatDigitalTime(studyDebt)}</span>
-              </div>
-              <p className="text-[9px] text-zinc-400 max-w-[180px]">
-                ※ 상단의 📚 <strong>STUDY DEBT DUE</strong> 카드를 터치하여 공부 시간을 채우고 공부 빚을 줄여보세요!
-              </p>
-            </div>
-          )}
 
         </div>
 

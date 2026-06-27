@@ -81,38 +81,38 @@ export default function ScreenTimeApp({
                     : activeTimer === 'langflix'
                       ? 'border-emerald-500 bg-emerald-100/35 ring-2 ring-emerald-500/20 animate-pulse'
                       : 'border-rose-100 bg-rose-50/20'
-                } p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 h-[130px] cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
+                } p-3.5 rounded-2xl flex flex-col justify-between transition-all duration-300 h-24 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
               >
                 <div className="flex justify-between items-center">
-                  <span className={`text-[10px] font-black tracking-widest uppercase font-space ${
+                  <span className={`text-[9px] font-black tracking-widest uppercase font-space ${
                     isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
                   }`}>
                     STUDY DEBT DUE
                   </span>
                   {activeTimer === 'langflix' ? (
-                    <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[8px] font-black tracking-wider uppercase font-space animate-pulse">
+                    <span className="px-1.5 py-0.5 bg-emerald-500 text-white rounded text-[7px] font-black tracking-wider uppercase font-space animate-pulse">
                       ● STUDYING
                     </span>
                   ) : isDebtCleared ? (
-                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[8px] font-black tracking-wider uppercase font-space">
+                    <span className="px-1.5 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[7px] font-black tracking-wider uppercase font-space">
                       CLEARED
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 bg-rose-100 text-rose-800 rounded text-[8px] font-black tracking-wider uppercase font-space animate-pulse">
+                    <span className="px-1.5 py-0.5 bg-rose-100 text-rose-800 rounded text-[7px] font-black tracking-wider uppercase font-space animate-pulse">
                       REQUIRED
                     </span>
                   )}
                 </div>
 
-                <div className="space-y-1">
-                  <div className={`text-4xl font-black tracking-tight font-outfit ${
+                <div className="space-y-0.5">
+                  <div className={`text-3xl font-black tracking-tight font-outfit ${
                     isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
                   }`}>
                     {formatDigitalTime(studyDebt)}
                   </div>
-                  <p className="text-[10px] text-zinc-500 font-medium leading-normal">
+                  <p className="text-[9px] text-zinc-500 font-semibold leading-none truncate">
                     {activeTimer === 'langflix'
-                      ? '공부 시간을 측정 중입니다... (누르면 정지)'
+                      ? '공부 시간을 측정 중입니다...'
                       : isDebtCleared 
                         ? '완벽합니다! 오늘의 소셜 빚을 모두 갚았습니다.' 
                         : '영어 공부(랭플릭스)가 밀려있습니다.'
@@ -131,7 +131,7 @@ export default function ScreenTimeApp({
                     setActiveTimer('langflix');
                   }
                 }}
-                className="w-[130px] h-[130px] shrink-0 rounded-2xl bg-[#E16539] flex flex-col items-center justify-center text-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] active:scale-95 cursor-pointer relative group overflow-hidden"
+                className="w-24 h-24 shrink-0 rounded-2xl bg-[#E16539] flex flex-col items-center justify-center text-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] active:scale-95 cursor-pointer relative group overflow-hidden"
                 title="랭플릭스 바로가기 (공부 자동 시작)"
               >
                 {/* Glossy light effect */}
@@ -139,7 +139,7 @@ export default function ScreenTimeApp({
                 <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
                 
                 {/* Langflix Custom Cute Character SVG based on provided image */}
-                <svg viewBox="0 0 100 100" className="w-[100px] h-[100px] drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg viewBox="0 0 100 100" className="w-[76px] h-[76px] drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" fill="none" xmlns="http://www.w3.org/2000/svg">
                   {/* Stripes (hair/waves) on top-right */}
                   <path d="M 46 17 C 59 19, 74 29, 80 43" stroke="black" strokeWidth="4.8" strokeLinecap="round" />
                   <path d="M 53 13 C 68 16, 83 28, 88 45" stroke="black" strokeWidth="4.8" strokeLinecap="round" />
