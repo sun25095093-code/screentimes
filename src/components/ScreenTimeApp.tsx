@@ -54,10 +54,10 @@ export default function ScreenTimeApp({
   const resetHour = 5;
 
   return (
-    <div id="screentime-app-container" className="h-full min-h-screen md:min-h-[700px] flex flex-col bg-white text-zinc-950 select-none relative overflow-hidden font-sans">
+    <div id="screentime-app-container" className="h-screen max-h-screen flex flex-col bg-white text-zinc-950 select-none relative overflow-hidden font-sans">
       
       {/* Header */}
-      <div className="pt-12 pb-4 px-6 bg-white border-b border-zinc-100 flex items-center justify-between sticky top-0 z-30">
+      <div className="pt-8 pb-3 px-6 bg-white border-b border-zinc-100 flex items-center justify-between sticky top-0 z-30">
         <div className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-zinc-800" />
           <span className="text-[11px] font-black tracking-widest text-zinc-900 uppercase font-space">SCREEN TIME</span>
@@ -65,11 +65,11 @@ export default function ScreenTimeApp({
       </div>
 
       {/* Main Container - No-Scroll Design */}
-      <div className="flex-1 flex flex-col justify-between p-6 pb-12 overflow-hidden space-y-6">
+      <div className="flex-1 flex flex-col justify-between p-5 pb-4 overflow-hidden space-y-4">
         
         {viewMode === 'today' ? (
           /* TODAY VIEW MODE */
-          <div className="flex-1 flex flex-col justify-between space-y-6">
+          <div className="flex-1 flex flex-col justify-between space-y-4">
             
             {/* 1. Study Required Debt Box (Huge Callout) */}
             <div 
@@ -80,7 +80,7 @@ export default function ScreenTimeApp({
                   : activeTimer === 'langflix'
                     ? 'border-emerald-500 bg-emerald-100/35 ring-2 ring-emerald-500/20 animate-pulse'
                     : 'border-rose-100 bg-rose-50/20'
-              } p-6 rounded-2xl flex flex-col justify-between transition-all duration-300 h-[160px] cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
+              } p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 h-[130px] cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
             >
               <div className="flex justify-between items-center">
                 <span className={`text-[10px] font-black tracking-widest uppercase font-space ${
@@ -103,8 +103,8 @@ export default function ScreenTimeApp({
                 )}
               </div>
 
-              <div className="space-y-1.5">
-                <div className={`text-5xl font-black tracking-tight font-outfit ${
+              <div className="space-y-1">
+                <div className={`text-4xl font-black tracking-tight font-outfit ${
                   isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
                 }`}>
                   {formatDigitalTime(studyDebt)}
@@ -121,47 +121,107 @@ export default function ScreenTimeApp({
             </div>
 
             {/* 2. Individual App Breakdowns */}
-            <div className="grid grid-cols-2 gap-4">
-              <div 
-                onClick={() => setActiveTimer(activeTimer === 'instagram' ? 'none' : 'instagram')}
-                className={`border ${
-                  activeTimer === 'instagram'
-                    ? 'border-pink-500 bg-pink-100/40 ring-2 ring-pink-500/20 animate-pulse text-pink-950'
-                    : 'border-pink-200 bg-pink-50/30 text-pink-950'
-                } rounded-2xl p-5 flex flex-col justify-between h-[110px] transition hover:bg-pink-50/50 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black tracking-widest text-pink-500 uppercase font-space">
-                    INSTAGRAM
-                  </span>
-                  {activeTimer === 'instagram' && (
-                    <span className="w-2 h-2 rounded-full bg-pink-500 animate-ping" />
-                  )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {/* Instagram */}
+              <div className="flex items-center gap-2">
+                <div 
+                  onClick={() => setActiveTimer(activeTimer === 'instagram' ? 'none' : 'instagram')}
+                  className={`border flex-1 ${
+                    activeTimer === 'instagram'
+                      ? 'border-pink-500 bg-pink-100/40 ring-2 ring-pink-500/20 animate-pulse text-pink-950'
+                      : 'border-pink-200 bg-pink-50/30 text-pink-950'
+                  } rounded-2xl p-3 flex flex-col justify-between h-20 transition hover:bg-pink-50/50 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] font-black tracking-widest text-pink-500 uppercase font-space flex items-center gap-1">
+                      INSTAGRAM
+                      {activeTimer === 'instagram' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse" />
+                      )}
+                    </span>
+                    {activeTimer === 'instagram' && (
+                      <span className="text-[8px] font-bold text-pink-600 bg-pink-100/60 px-1 py-0.5 rounded">측정중</span>
+                    )}
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black font-outfit tracking-tight tabular-nums">
+                    {formatDigitalTime(settings.instagramTime)}
+                  </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black font-outfit tracking-tight tabular-nums">
-                  {formatDigitalTime(settings.instagramTime)}
-                </div>
+
+                {/* 1:1 Instagram Shortcut App Icon */}
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (activeTimer !== 'instagram') {
+                      setActiveTimer('instagram');
+                    }
+                  }}
+                  className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center text-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] active:scale-95 cursor-pointer relative group overflow-hidden"
+                  title="인스타그램 바로가기 (측정 자동 시작)"
+                >
+                  {/* Glossy light effect */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/5 to-transparent pointer-events-none" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
+                  
+                  {/* Instagram Camera Logo SVG */}
+                  <svg className="w-9 h-9 drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                  </svg>
+                </a>
               </div>
 
-              <div 
-                onClick={() => setActiveTimer(activeTimer === 'twitter' ? 'none' : 'twitter')}
-                className={`border ${
-                  activeTimer === 'twitter'
-                    ? 'border-sky-500 bg-sky-100/40 ring-2 ring-sky-500/20 animate-pulse text-sky-950'
-                    : 'border-sky-200 bg-sky-50/30 text-sky-950'
-                } rounded-2xl p-5 flex flex-col justify-between h-[110px] transition hover:bg-sky-50/50 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] font-black tracking-widest text-sky-400 uppercase font-space">
-                    TWITTER (X)
-                  </span>
-                  {activeTimer === 'twitter' && (
-                    <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                  )}
+              {/* Twitter */}
+              <div className="flex items-center gap-2">
+                <div 
+                  onClick={() => setActiveTimer(activeTimer === 'twitter' ? 'none' : 'twitter')}
+                  className={`border flex-1 ${
+                    activeTimer === 'twitter'
+                      ? 'border-sky-500 bg-sky-100/40 ring-2 ring-sky-500/20 animate-pulse text-sky-950'
+                      : 'border-sky-200 bg-sky-50/30 text-sky-950'
+                  } rounded-2xl p-3 flex flex-col justify-between h-20 transition hover:bg-sky-50/50 cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] font-black tracking-widest text-sky-400 uppercase font-space flex items-center gap-1">
+                      TWITTER (X)
+                      {activeTimer === 'twitter' && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                      )}
+                    </span>
+                    {activeTimer === 'twitter' && (
+                      <span className="text-[8px] font-bold text-sky-600 bg-sky-100/60 px-1 py-0.5 rounded">측정중</span>
+                    )}
+                  </div>
+                  <div className="text-xl sm:text-2xl font-black font-outfit tracking-tight tabular-nums">
+                    {formatDigitalTime(settings.twitterTime)}
+                  </div>
                 </div>
-                <div className="text-2xl sm:text-3xl font-black font-outfit tracking-tight tabular-nums">
-                  {formatDigitalTime(settings.twitterTime)}
-                </div>
+
+                {/* 1:1 Twitter/X Shortcut App Icon - Classic Blue Bird */}
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (activeTimer !== 'twitter') {
+                      setActiveTimer('twitter');
+                    }
+                  }}
+                  className="w-20 h-20 shrink-0 rounded-2xl bg-[#1DA1F2] flex items-center justify-center text-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] active:scale-95 cursor-pointer relative group overflow-hidden"
+                  title="트위터 바로가기 (측정 자동 시작)"
+                >
+                  {/* Glossy light effect */}
+                  <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-white/5 to-transparent pointer-events-none" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
+                  
+                  {/* Classic Twitter Bird Logo SVG */}
+                  <svg className="w-9 h-9 drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)] fill-current text-white" viewBox="0 0 24 24">
+                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                  </svg>
+                </a>
               </div>
             </div>
 
@@ -173,7 +233,7 @@ export default function ScreenTimeApp({
                 )}
                 <span>COMBINED SOCIAL TIME</span>
               </span>
-              <div className="text-5xl font-black tracking-tight text-zinc-950 font-outfit select-all leading-none py-1 drop-shadow-sm">
+              <div className="text-4xl font-black tracking-tight text-zinc-950 font-outfit select-all leading-none py-1 drop-shadow-sm">
                 {formatDigitalTime(totalSocialTime)}
               </div>
             </div>
@@ -181,25 +241,25 @@ export default function ScreenTimeApp({
             {/* 4. Action Button to Weekly View */}
             <button
               onClick={() => setViewMode('weekly')}
-              className="w-full py-4 bg-zinc-950 hover:bg-zinc-900 text-white rounded-2xl flex items-center justify-center gap-2.5 transition active:scale-[0.98] cursor-pointer shadow-md"
+              className="w-full py-3.5 bg-zinc-950 hover:bg-zinc-900 text-white rounded-2xl flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer shadow-md"
             >
-              <Calendar className="w-4.5 h-4.5 text-zinc-400" />
-              <span className="text-[11px] font-black tracking-widest uppercase font-space">일주일 분석 리포트 보기</span>
-              <ChevronRight className="w-4.5 h-4.5 text-zinc-400" />
+              <Calendar className="w-4 h-4 text-zinc-400" />
+              <span className="text-[10px] font-black tracking-widest uppercase font-space">일주일 분석 리포트 보기</span>
+              <ChevronRight className="w-4 h-4 text-zinc-400" />
             </button>
 
           </div>
         ) : (
           /* WEEKLY HISTORY VIEW MODE */
-          <div className="flex-1 flex flex-col justify-between space-y-6">
+          <div className="flex-1 flex flex-col justify-between space-y-4">
             
             {/* Header / Top Back Button */}
             <div className="flex items-center justify-between py-1">
               <button
                 onClick={() => setViewMode('today')}
-                className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-950 text-[11px] font-black tracking-wider uppercase cursor-pointer font-space"
+                className="flex items-center gap-1.5 text-zinc-500 hover:text-zinc-950 text-[10px] font-black tracking-wider uppercase cursor-pointer font-space"
               >
-                <ChevronLeft className="w-4.5 h-4.5" />
+                <ChevronLeft className="w-4 h-4" />
                 <span>오늘 분석으로</span>
               </button>
               <span className="text-[9px] font-black tracking-[0.2em] text-zinc-400 uppercase font-space">
@@ -208,19 +268,19 @@ export default function ScreenTimeApp({
             </div>
 
             {/* Weekly Bar Chart Panel */}
-            <div className="border border-zinc-100 bg-zinc-50/30 rounded-2xl p-5 flex-1 flex flex-col justify-between min-h-[350px] shadow-sm">
+            <div className="border border-zinc-100 bg-zinc-50/30 rounded-2xl p-4 flex-1 flex flex-col justify-between min-h-[280px] shadow-sm">
               
               <div className="flex justify-between items-start">
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   <span className="text-[9px] font-black tracking-widest text-zinc-400 uppercase block font-space">
                     AVERAGE SNS VS STUDY
                   </span>
-                  <h4 className="text-xl font-black text-zinc-900">최근 일주일간의 변화</h4>
+                  <h4 className="text-lg font-black text-zinc-900">최근 일주일간의 변화</h4>
                 </div>
               </div>
 
               {/* Clean Vertical Bar Chart */}
-              <div className="h-48 flex items-end justify-between pt-6 relative">
+              <div className="h-40 flex items-end justify-between pt-4 relative">
                 {/* Background Guidelines */}
                 <div className="absolute inset-x-0 top-0 border-t border-zinc-100/80" />
                 <div className="absolute inset-x-0 top-1/2 border-t border-zinc-100/80" />
@@ -232,12 +292,12 @@ export default function ScreenTimeApp({
                   </div>
                 ) : (
                   displayHistory.map((day, idx) => {
-                    const socialHeight = Math.max(6, Math.min(140, (day.socialTime / maxHistoryValue) * 140));
-                    const studyHeight = Math.max(6, Math.min(140, (day.studyTime / maxHistoryValue) * 140));
+                    const socialHeight = Math.max(6, Math.min(100, (day.socialTime / maxHistoryValue) * 100));
+                    const studyHeight = Math.max(6, Math.min(100, (day.studyTime / maxHistoryValue) * 100));
 
                     return (
-                      <div key={idx} className="flex flex-col items-center flex-1 space-y-3">
-                        <div className="flex gap-1.5 items-end h-36">
+                      <div key={idx} className="flex flex-col items-center flex-1 space-y-2">
+                        <div className="flex gap-1.5 items-end h-28">
                           
                           {/* Social Time Bar */}
                           <div className="group relative">
@@ -275,7 +335,7 @@ export default function ScreenTimeApp({
               </div>
 
               {/* Custom Legend */}
-              <div className="flex justify-center gap-5 pt-4 border-t border-zinc-100 text-[9px] font-bold tracking-wider text-zinc-400">
+              <div className="flex justify-center gap-5 pt-3 border-t border-zinc-100 text-[9px] font-bold tracking-wider text-zinc-400">
                 <div className="flex items-center gap-1.5">
                   <span className="w-3 h-3 bg-zinc-300 rounded-sm" />
                   <span>소셜 미디어 사용</span>
@@ -291,7 +351,7 @@ export default function ScreenTimeApp({
             {/* Back Button */}
             <button
               onClick={() => setViewMode('today')}
-              className="w-full py-4 bg-zinc-950 hover:bg-zinc-900 text-white rounded-2xl text-[11px] font-black tracking-widest uppercase transition cursor-pointer font-space shadow-md"
+              className="w-full py-3.5 bg-zinc-950 hover:bg-zinc-900 text-white rounded-2xl text-[10px] font-black tracking-widest uppercase transition cursor-pointer font-space shadow-md"
             >
               오늘 기록 보기
             </button>
@@ -300,7 +360,7 @@ export default function ScreenTimeApp({
         )}
 
         {/* Dawn Countdown info footer (Shared) */}
-        <div className="text-center text-[8px] font-extrabold tracking-[0.2em] text-zinc-400 uppercase mt-4 pt-4 border-t border-zinc-100 font-space pb-2">
+        <div className="text-center text-[8px] font-extrabold tracking-[0.2em] text-zinc-400 uppercase mt-2 pt-2 border-t border-zinc-100 font-space pb-1">
           RESETS DAILY AT {resetHour.toString().padStart(2, '0')}:00 AM · NEXT RESET IN {formatDigitalTime(secondsUntilReset)}
         </div>
 

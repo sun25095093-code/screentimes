@@ -1,14 +1,85 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" rx="112" fill="#09090b"/>
-  <!-- Glowing rings representing screentime limitation and focus -->
-  <circle cx="256" cy="256" r="180" fill="none" stroke="#f43f5e" stroke-width="14" opacity="0.25" />
-  <circle cx="256" cy="256" r="150" fill="none" stroke="#10b981" stroke-width="14" opacity="0.25" />
+  <!-- Rounded pastel warm-cream background -->
+  <rect width="512" height="512" rx="112" fill="#FFF4EB"/>
   
-  <!-- Sleek Book structure for LangFlix -->
-  <path d="M190 230h132c12 0 22 10 22 22v80c0 12-10 22-22 22H190c-12 0-22-10-22-22v-80c0-12 10-22 22-22z" fill="none" stroke="#10b981" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M256 230v124" stroke="#10b981" stroke-width="12" stroke-linecap="round"/>
+  <!-- Subtle shadow under the body -->
+  <ellipse cx="256" cy="425" rx="140" ry="22" fill="#EADCD0" opacity="0.6" />
   
-  <!-- Elegant Clock for ScreenTime -->
-  <circle cx="256" cy="180" r="50" fill="#09090b" stroke="#f43f5e" stroke-width="18" />
-  <path d="M256 150v30h25" stroke="#f43f5e" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Cute small stars/sparkles around to make it magical -->
+  <!-- Top Left Star -->
+  <path d="M120 140 L124 150 L134 154 L124 158 L120 168 L116 158 L106 154 L116 150 Z" fill="#FFB7B2" />
+  <!-- Top Right Star -->
+  <path d="M390 120 L394 130 L404 134 L394 138 L390 148 L386 138 L376 134 L386 130 Z" fill="#FFB7B2" />
+  <!-- Bottom Left Star -->
+  <path d="M100 340 L103 348 L111 351 L103 354 L100 362 L97 354 L89 351 L97 348 Z" fill="#FFD166" />
+  <!-- Bottom Right Star -->
+  <path d="M410 320 L413 328 L421 331 L413 334 L410 342 L407 334 L399 331 L407 328 Z" fill="#10B981" opacity="0.7" />
+
+  <!-- Cat Ears -->
+  <!-- Left Ear -->
+  <path d="M150 190 L110 80 Q145 65 195 135 Z" fill="#FFFFFF" stroke="#4A3B32" stroke-width="12" stroke-linejoin="round" />
+  <path d="M152 175 L122 95 Q145 85 177 133 Z" fill="#FFAAA6" />
+  <!-- Right Ear -->
+  <path d="M362 190 L402 80 Q367 65 317 135 Z" fill="#FFFFFF" stroke="#4A3B32" stroke-width="12" stroke-linejoin="round" />
+  <path d="M360 175 L390 95 Q367 85 335 133 Z" fill="#FFAAA6" />
+
+  <!-- Main Clock Body (Chubby Cat Head shape) -->
+  <circle cx="256" cy="275" r="145" fill="#FFFFFF" stroke="#4A3B32" stroke-width="14" />
+
+  <!-- Blush on Cheeks -->
+  <ellipse cx="165" cy="285" rx="20" ry="12" fill="#FFAAA6" opacity="0.8" />
+  <ellipse cx="347" cy="285" rx="20" ry="12" fill="#FFAAA6" opacity="0.8" />
+
+  <!-- Sparkly Cat Eyes -->
+  <!-- Left Eye -->
+  <circle cx="195" cy="255" r="16" fill="#4A3B32" />
+  <circle cx="191" cy="250" r="6" fill="#FFFFFF" />
+  <circle cx="199" cy="259" r="3" fill="#FFFFFF" />
+  <!-- Right Eye -->
+  <circle cx="317" cy="255" r="16" fill="#4A3B32" />
+  <circle cx="313" cy="250" r="6" fill="#FFFFFF" />
+  <circle cx="321" cy="259" r="3" fill="#FFFFFF" />
+
+  <!-- Cute Cat Mouth -->
+  <path d="M241 278 Q251 288 256 278 Q261 288 271 278" fill="none" stroke="#4A3B32" stroke-width="8" stroke-linecap="round" />
+
+  <!-- Cute whiskers -->
+  <line x1="110" y1="275" x2="80" y2="270" stroke="#4A3B32" stroke-width="6" stroke-linecap="round" />
+  <line x1="110" y1="290" x2="80" y2="295" stroke="#4A3B32" stroke-width="6" stroke-linecap="round" />
+  <line x1="402" y1="275" x2="432" y2="270" stroke="#4A3B32" stroke-width="6" stroke-linecap="round" />
+  <line x1="402" y1="290" x2="432" y2="295" stroke="#4A3B32" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Clock markings (Cute dots) -->
+  <circle cx="256" cy="160" r="6" fill="#4A3B32" />
+  <circle cx="371" cy="275" r="6" fill="#4A3B32" />
+  <circle cx="256" cy="390" r="6" fill="#4A3B32" />
+  <circle cx="141" cy="275" r="6" fill="#4A3B32" />
+
+  <!-- Clock Hands -->
+  <!-- Hour Hand: Pastel Pink representing Social Screen Time limit -->
+  <line x1="256" y1="275" x2="256" y2="200" stroke="#FF5D8F" stroke-width="12" stroke-linecap="round" />
+  <!-- Minute Hand: Pastel Mint/Green representing Study Time (LangFlix) -->
+  <line x1="256" y1="275" x2="315" y2="240" stroke="#10B981" stroke-width="10" stroke-linecap="round" />
+  <!-- Center Pin -->
+  <circle cx="256" cy="275" r="10" fill="#4A3B32" />
+
+  <!-- Cute Cat Feet -->
+  <!-- Left Foot -->
+  <path d="M165 390 C150 415, 195 425, 205 395" fill="#FFFFFF" stroke="#4A3B32" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  <!-- Right Foot -->
+  <path d="M347 390 C362 415, 317 425, 307 395" fill="#FFFFFF" stroke="#4A3B32" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" />
+  
+  <!-- A tiny little orange book (study) floating on the left -->
+  <g transform="translate(65, 205) rotate(-15)">
+    <path d="M10 5 H35 A5 5 0 0 1 40 10 V35 A5 5 0 0 1 35 40 H10 A5 5 0 0 1 5 35 V10 A5 5 0 0 1 10 5" fill="#FF8243" stroke="#4A3B32" stroke-width="6" />
+    <path d="M10 5 V40" stroke="#FFFFFF" stroke-width="4" />
+    <!-- Book pages detail -->
+    <path d="M15 15 H30 M15 23 H30 M15 31 H25" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" />
+  </g>
+
+  <!-- A tiny little play button icon (media) floating on the right -->
+  <g transform="translate(410, 195) rotate(15)">
+    <circle cx="20" cy="20" r="18" fill="#FF5D8F" stroke="#4A3B32" stroke-width="6" />
+    <polygon points="16,12 28,20 16,28" fill="#FFFFFF" />
+  </g>
 </svg>
