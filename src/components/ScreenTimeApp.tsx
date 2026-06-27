@@ -18,7 +18,6 @@ interface ScreenTimeAppProps {
   secondsUntilReset: number;
   activeTimer: 'none' | 'instagram' | 'twitter' | 'langflix';
   setActiveTimer: (timer: 'none' | 'instagram' | 'twitter' | 'langflix') => void;
-  setHistory: React.Dispatch<React.SetStateAction<ScreenTimeHistory[]>>;
 }
 
 export default function ScreenTimeApp({ 
@@ -27,8 +26,7 @@ export default function ScreenTimeApp({
   history, 
   secondsUntilReset,
   activeTimer,
-  setActiveTimer,
-  setHistory
+  setActiveTimer
 }: ScreenTimeAppProps) {
   const [viewMode, setViewMode] = useState<'today' | 'weekly'>('today');
 
@@ -37,23 +35,6 @@ export default function ScreenTimeApp({
   // Study debt calculation based on exact user's formula: (Instagram time + Twitter time) - Langflix study time
   const studyDebt = Math.max(0, totalSocialTime - settings.langflixTime);
   const isDebtCleared = studyDebt <= 0;
-
-  // Helper function to get relative dates dynamically
-  const getRelativeDateString = (daysAgo: number): string => {
-    const targetDate = new Date();
-    targetDate.setDate(targetDate.getDate() - daysAgo);
-    
-    const month = targetDate.getMonth() + 1;
-    const day = targetDate.getDate();
-    
-    if (daysAgo === 1) {
-      return `어제 (${month}월 ${day}일)`;
-    } else if (daysAgo === 2) {
-      return `그저께 (${month}월 ${day}일)`;
-    } else {
-      return `${month}월 ${day}일`;
-    }
-  };
 
   // Slice the most recent 5 past days from history and reverse them so that left-to-right goes from oldest to newest, then append today's record at the end
   const todayRecord: ScreenTimeHistory = {
@@ -69,17 +50,6 @@ export default function ScreenTimeApp({
     ...displayHistory.map(d => Math.max(d.socialTime, d.studyTime)),
     300 // default minimum peak (5 minutes) for scaling
   );
-
-  const fillSampleHistory = () => {
-    const sampleData: ScreenTimeHistory[] = [
-      { date: getRelativeDateString(1), socialTime: 1800, studyTime: 2400, isGoalAchieved: true },
-      { date: getRelativeDateString(2), socialTime: 3600, studyTime: 1200, isGoalAchieved: false },
-      { date: getRelativeDateString(3), socialTime: 2400, studyTime: 3000, isGoalAchieved: true },
-      { date: getRelativeDateString(4), socialTime: 4800, studyTime: 1800, isGoalAchieved: false },
-      { date: getRelativeDateString(5), socialTime: 1500, studyTime: 1500, isGoalAchieved: true }
-    ];
-    setHistory(sampleData);
-  };
 
   const resetHour = 5;
 
@@ -247,14 +217,6 @@ export default function ScreenTimeApp({
                   </span>
                   <h4 className="text-xl font-black text-zinc-900">최근 일주일간의 변화</h4>
                 </div>
-                {history.length > 0 && (
-                  <button
-                    onClick={() => setHistory([])}
-                    className="text-[9px] font-black text-zinc-400 hover:text-rose-500 uppercase font-space transition cursor-pointer"
-                  >
-                    기록 비우기
-                  </button>
-                )}
               </div>
 
               {/* Clean Vertical Bar Chart */}
@@ -266,13 +228,7 @@ export default function ScreenTimeApp({
                 {history.length === 0 ? (
                   <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                     <span className="text-[11px] font-bold text-zinc-400">아직 정산된 기록이 없습니다.</span>
-                    <span className="text-[9px] text-zinc-400 mt-1 mb-4 leading-relaxed max-w-[240px]">매일 새벽 5시에 오늘 사용량이 정산되어 차례대로 기록됩니다!</span>
-                    <button 
-                      onClick={fillSampleHistory}
-                      className="px-4 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-xl text-[10px] font-black tracking-wider uppercase transition active:scale-95 cursor-pointer shadow-sm"
-                    >
-                      테스트용 6일 기록 채우기
-                    </button>
+                    <span className="text-[9px] text-zinc-400 mt-1 leading-relaxed max-w-[240px]">매일 새벽 5시에 오늘 사용량이 정산되어 차례대로 기록됩니다!</span>
                   </div>
                 ) : (
                   displayHistory.map((day, idx) => {

@@ -80,15 +80,148 @@ export default function App() {
   const [simulatedTime, setSimulatedTime] = useState<Date>(new Date());
   const [secondsUntilReset, setSecondsUntilReset] = useState(0);
 
-  // Active manual measurement state
-  const [activeTimer, setActiveTimer] = useState<'none' | 'instagram' | 'twitter' | 'langflix'>('none');
-  const [sessionSeconds, setSessionSeconds] = useState(0);
+  // Active manual measurement state restored from localStorage on launch
+  const [activeTimer, setActiveTimer] = useState<'none' | 'instagram' | 'twitter' | 'langflix'>(() => {
+    const savedActive = localStorage.getItem('screentime_active_timer');
+    if (savedActive && ['instagram', 'twitter', 'langflix'].includes(savedActive)) {
+      return savedActive as 'instagram' | 'twitter' | 'langflix';
+    }
+    return 'none';
+  });
+  const [sessionSeconds, setSessionSeconds] = useState<number>(() => {
+    const savedStart = localStorage.getItem('screentime_timer_start');
+    if (savedStart) {
+      const elapsed = Math.floor((Date.now() - Number(savedStart)) / 1000);
+      return Math.max(0, elapsed);
+    }
+    return 0;
+  });
 
   // Sound/Vibe indicator
   const [vibeMessage, setVibeMessage] = useState<string | null>(null);
 
   // Keep tracking of 15 minute blocks of social media usage to trigger periodic alerts
   const last15MinBlock = useRef<number>(0);
+  const lastSession15MinTriggered = useRef<number>(0);
+
+  // Silent audio loop to keep iOS PWA process awake in background
+  const SILENT_AUDIO_URI = "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA";
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const startSilentAudio = () => {
+    try {
+      if (!audioRef.current) {
+        audioRef.current = new Audio(SILENT_AUDIO_URI);
+        audioRef.current.loop = true;
+      }
+      audioRef.current.play().catch(err => {
+        console.log("Audio play deferred or blocked until user interaction", err);
+      });
+    } catch (e) {
+      console.error("Silent audio initiation error", e);
+    }
+  };
+
+  const stopSilentAudio = () => {
+    try {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    } catch (e) {
+      console.error("Silent audio stop error", e);
+    }
+  };
+
+  // Pre-schedule future standard timeouts for notifications (multi-reservation)
+  const scheduledTimeoutIds = useRef<any[]>([]);
+
+  const cancelScheduledNotifications = () => {
+    scheduledTimeoutIds.current.forEach(id => clearTimeout(id));
+    scheduledTimeoutIds.current = [];
+  };
+
+  const scheduleBackgroundNotifications = (appName: 'instagram' | 'twitter', startTime: number) => {
+    cancelScheduledNotifications();
+    const appLabel = appName === 'instagram' ? '인스타그램' : '트위터';
+    
+    // Schedule alerts at 15m, 30m, 45m, 60m, 75m, 90m intervals
+    const intervals = [15, 30, 45, 60, 75, 90];
+    
+    intervals.forEach(minutes => {
+      const delayMs = minutes * 60 * 1000;
+      
+      const timeoutId = setTimeout(() => {
+        sendPushNotification(
+          `⚠️ ${appLabel} 연속 사용 경고 (${minutes}분)`,
+          `측정을 시작한 지 ${minutes}분이 경과했습니다! 소셜 미디어를 끄고 영어 공부를 시작해보는 건 어떨까요?`,
+          'ScreenTime'
+        );
+      }, delayMs);
+      
+      scheduledTimeoutIds.current.push(timeoutId);
+    });
+  };
+
+  // Synchronizes react settings state with absolute timer timestamp difference (foolproof background tracking)
+  const syncTimerWithTimestamp = () => {
+    const currentActiveTimer = localStorage.getItem('screentime_active_timer') as 'none' | 'instagram' | 'twitter' | 'langflix' | null;
+    if (!currentActiveTimer || currentActiveTimer === 'none') return;
+    
+    const savedStart = localStorage.getItem('screentime_timer_start');
+    const savedBase = localStorage.getItem('screentime_base_time');
+    
+    if (savedStart && savedBase) {
+      const elapsed = Math.floor((Date.now() - Number(savedStart)) / 1000);
+      const currentElapsed = Math.max(0, elapsed);
+      
+      setSessionSeconds(currentElapsed);
+      
+      setSettings(prev => {
+        const nextSettings = { ...prev };
+        const nextTime = Number(savedBase) + currentElapsed;
+        
+        if (currentActiveTimer === 'langflix') {
+          nextSettings.langflixTime = nextTime;
+        } else if (currentActiveTimer === 'instagram') {
+          nextSettings.instagramTime = nextTime;
+        } else if (currentActiveTimer === 'twitter') {
+          nextSettings.twitterTime = nextTime;
+        }
+        
+        const totalSocialBefore = prev.instagramTime + prev.twitterTime;
+        const totalSocialAfter = nextSettings.instagramTime + nextSettings.twitterTime;
+        
+        if (totalSocialBefore <= prev.targetLimit && totalSocialAfter > prev.targetLimit) {
+          triggerVibration("⏱️ 일일 목표 소셜 시간을 초과했습니다!");
+          sendPushNotification(
+            '⚠️ 오늘의 소셜 사용 한도 초과!',
+            `설정하신 ${prev.targetLimit / 60}분 제한을 초과했습니다. 지금 즉시 영어 공부를 시작해야 합니다!`,
+            'ScreenTime'
+          );
+        }
+        
+        return nextSettings;
+      });
+
+      // Handle periodic 15 minute warning notifications
+      if (currentActiveTimer === 'instagram' || currentActiveTimer === 'twitter') {
+        const currentSessionBlock = Math.floor(currentElapsed / 900);
+        if (currentSessionBlock > lastSession15MinTriggered.current) {
+          for (let block = lastSession15MinTriggered.current + 1; block <= currentSessionBlock; block++) {
+            const minutes = block * 15;
+            const appLabel = currentActiveTimer === 'instagram' ? '인스타그램' : '트위터';
+            sendPushNotification(
+              `⚠️ ${appLabel} 연속 사용 경고 (${minutes}분)`,
+              `측정을 시작한 지 ${minutes}분이 경과했습니다! 소셜 미디어를 끄고 영어 공부를 시작해보는 건 어떨까요?`,
+              'ScreenTime'
+            );
+          }
+          lastSession15MinTriggered.current = currentSessionBlock;
+        }
+      }
+    }
+  };
 
   // Computed metrics
   const totalSocial = settings.instagramTime + settings.twitterTime;
@@ -154,60 +287,104 @@ export default function App() {
     });
   };
 
-  // Reset session seconds on timer change
+  // Wrapper function to change the active timer with full sync, silent audio loop & notification schedules
+  const handleSetActiveTimer = (newTimer: 'none' | 'instagram' | 'twitter' | 'langflix') => {
+    if (newTimer === activeTimer) return;
+    
+    // 1. If there was a timer active before, finalize its settings
+    if (activeTimer !== 'none') {
+      const savedStart = localStorage.getItem('screentime_timer_start');
+      const savedBase = localStorage.getItem('screentime_base_time');
+      
+      if (savedStart && savedBase) {
+        const elapsed = Math.floor((Date.now() - Number(savedStart)) / 1000);
+        const currentElapsed = Math.max(0, elapsed);
+        const finalTime = Number(savedBase) + currentElapsed;
+        
+        setSettings(prev => {
+          const updated = { ...prev };
+          if (activeTimer === 'instagram') updated.instagramTime = finalTime;
+          if (activeTimer === 'twitter') updated.twitterTime = finalTime;
+          if (activeTimer === 'langflix') updated.langflixTime = finalTime;
+          return updated;
+        });
+      }
+      
+      localStorage.removeItem('screentime_active_timer');
+      localStorage.removeItem('screentime_timer_start');
+      localStorage.removeItem('screentime_base_time');
+      
+      cancelScheduledNotifications();
+      stopSilentAudio();
+    }
+    
+    // 2. Set new active timer
+    if (newTimer !== 'none') {
+      const baseValue = newTimer === 'instagram' 
+        ? settings.instagramTime 
+        : newTimer === 'twitter' 
+          ? settings.twitterTime 
+          : settings.langflixTime;
+      
+      const now = Date.now();
+      localStorage.setItem('screentime_active_timer', newTimer);
+      localStorage.setItem('screentime_timer_start', String(now));
+      localStorage.setItem('screentime_base_time', String(baseValue));
+      
+      setSessionSeconds(0);
+      lastSession15MinTriggered.current = 0;
+      
+      startSilentAudio();
+      
+      if (newTimer === 'instagram' || newTimer === 'twitter') {
+        scheduleBackgroundNotifications(newTimer, now);
+      }
+    }
+    
+    setActiveTimer(newTimer);
+  };
+
+  // Sync timer on focus / visibility change (iOS PWA return to foreground)
   useEffect(() => {
-    setSessionSeconds(0);
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        syncTimerWithTimestamp();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', syncTimerWithTimestamp);
+    
+    // If a timer was already active on mount (PWA resume/reload), start background audio and schedule notifications
+    if (activeTimer !== 'none') {
+      startSilentAudio();
+      const savedStart = localStorage.getItem('screentime_timer_start');
+      if (savedStart) {
+        const elapsed = Math.floor((Date.now() - Number(savedStart)) / 1000);
+        lastSession15MinTriggered.current = Math.floor(elapsed / 900);
+        if (activeTimer === 'instagram' || activeTimer === 'twitter') {
+          scheduleBackgroundNotifications(activeTimer, Number(savedStart));
+        }
+      }
+    }
+    
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', syncTimerWithTimestamp);
+    };
   }, [activeTimer]);
 
-  // Active timer second accumulator
+  // Run synchronization interval every second when activeTimer is running
   useEffect(() => {
-    if (activeTimer === 'none') return;
+    if (activeTimer === 'none') {
+      lastSession15MinTriggered.current = 0;
+      return;
+    }
+
+    syncTimerWithTimestamp();
 
     const interval = setInterval(() => {
-      setSessionSeconds(prev => {
-        const nextSecs = prev + 1;
-        
-        // Trigger notification every 15 minutes (900 seconds) for Instagram/Twitter
-        if (activeTimer === 'instagram' || activeTimer === 'twitter') {
-          if (nextSecs > 0 && nextSecs % 900 === 0) {
-            const minutes = Math.floor(nextSecs / 60);
-            const appLabel = activeTimer === 'instagram' ? '인스타그램' : '트위터';
-            sendPushNotification(
-              `⚠️ ${appLabel} 연속 사용 경고 (${minutes}분)`,
-              `측정을 시작한 지 ${minutes}분이 경과했습니다! 소셜 미디어를 끄고 영어 공부를 시작해보는 건 어떨까요?`,
-              'ScreenTime'
-            );
-          }
-        }
-        
-        return nextSecs;
-      });
-
-      setSettings(prev => {
-        const nextSettings = { ...prev };
-        
-        if (activeTimer === 'langflix') {
-          nextSettings.langflixTime = prev.langflixTime + 1;
-        } else if (activeTimer === 'instagram') {
-          nextSettings.instagramTime = prev.instagramTime + 1;
-        } else if (activeTimer === 'twitter') {
-          nextSettings.twitterTime = prev.twitterTime + 1;
-        }
-
-        const totalSocialBefore = prev.instagramTime + prev.twitterTime;
-        const totalSocialAfter = nextSettings.instagramTime + nextSettings.twitterTime;
-
-        if (totalSocialBefore <= prev.targetLimit && totalSocialAfter > prev.targetLimit) {
-          triggerVibration("⏱️ 일일 목표 소셜 시간을 초과했습니다!");
-          sendPushNotification(
-            '⚠️ 오늘의 소셜 사용 한도 초과!',
-            `설정하신 ${prev.targetLimit / 60}분 제한을 초과했습니다. 지금 즉시 영어 공부를 시작해야 합니다!`,
-            'ScreenTime'
-          );
-        }
-
-        return nextSettings;
-      });
+      syncTimerWithTimestamp();
     }, 1000);
 
     return () => clearInterval(interval);
@@ -249,7 +426,19 @@ export default function App() {
     
     // Attempt actual native OS push notification
     if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, { body });
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready.then(registration => {
+          registration.showNotification(title, {
+            body,
+            icon: '/apple-touch-icon.png',
+            badge: '/favicon.png'
+          });
+        }).catch(() => {
+          new Notification(title, { body });
+        });
+      } else {
+        new Notification(title, { body });
+      }
     }
   };
 
@@ -275,7 +464,9 @@ export default function App() {
 
   // Perform reset based on configured hour
   const triggerDailyReset = (timeToCheck: Date) => {
-    const formattedDate = `${timeToCheck.getMonth() + 1}월 ${timeToCheck.getDate()}일`;
+    const settledDate = new Date(timeToCheck.getTime());
+    settledDate.setDate(settledDate.getDate() - 1);
+    const formattedDate = `${settledDate.getMonth() + 1}월 ${settledDate.getDate()}일`;
     const totalSocial = settings.instagramTime + settings.twitterTime;
     
     const newRecord: ScreenTimeHistory = {
@@ -385,8 +576,7 @@ export default function App() {
             history={history}
             secondsUntilReset={secondsUntilReset}
             activeTimer={activeTimer}
-            setActiveTimer={setActiveTimer}
-            setHistory={setHistory}
+            setActiveTimer={handleSetActiveTimer}
           />
 
           {/* Time-limit warning overlay inside the app when target is exceeded */}
