@@ -71,53 +71,99 @@ export default function ScreenTimeApp({
           /* TODAY VIEW MODE */
           <div className="flex-1 flex flex-col justify-between space-y-4">
             
-            {/* 1. Study Required Debt Box (Huge Callout) */}
-            <div 
-              onClick={() => setActiveTimer(activeTimer === 'langflix' ? 'none' : 'langflix')}
-              className={`border ${
-                isDebtCleared 
-                  ? 'border-emerald-100 bg-emerald-50/20' 
-                  : activeTimer === 'langflix'
-                    ? 'border-emerald-500 bg-emerald-100/35 ring-2 ring-emerald-500/20 animate-pulse'
-                    : 'border-rose-100 bg-rose-50/20'
-              } p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 h-[130px] cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
-            >
-              <div className="flex justify-between items-center">
-                <span className={`text-[10px] font-black tracking-widest uppercase font-space ${
-                  isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
-                }`}>
-                  STUDY DEBT DUE
-                </span>
-                {activeTimer === 'langflix' ? (
-                  <span className="px-2.5 py-1 bg-emerald-500 text-white rounded-full text-[8px] font-black tracking-wider uppercase font-space animate-pulse">
-                    ● STUDYING
+            {/* 1. Study Required Debt Box (Huge Callout) with 1:1 Langflix Shortcut */}
+            <div className="flex items-center gap-3">
+              <div 
+                onClick={() => setActiveTimer(activeTimer === 'langflix' ? 'none' : 'langflix')}
+                className={`border flex-1 ${
+                  isDebtCleared 
+                    ? 'border-emerald-100 bg-emerald-50/20' 
+                    : activeTimer === 'langflix'
+                      ? 'border-emerald-500 bg-emerald-100/35 ring-2 ring-emerald-500/20 animate-pulse'
+                      : 'border-rose-100 bg-rose-50/20'
+                } p-4 rounded-2xl flex flex-col justify-between transition-all duration-300 h-[130px] cursor-pointer hover:scale-[1.01] active:scale-[0.99] select-none shadow-sm`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className={`text-[10px] font-black tracking-widest uppercase font-space ${
+                    isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
+                  }`}>
+                    STUDY DEBT DUE
                   </span>
-                ) : isDebtCleared ? (
-                  <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[8px] font-black tracking-wider uppercase font-space">
-                    CLEARED
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-1 bg-rose-100 text-rose-800 rounded-full text-[8px] font-black tracking-wider uppercase font-space animate-pulse">
-                    REQUIRED
-                  </span>
-                )}
+                  {activeTimer === 'langflix' ? (
+                    <span className="px-2 py-0.5 bg-emerald-500 text-white rounded text-[8px] font-black tracking-wider uppercase font-space animate-pulse">
+                      ● STUDYING
+                    </span>
+                  ) : isDebtCleared ? (
+                    <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded text-[8px] font-black tracking-wider uppercase font-space">
+                      CLEARED
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 bg-rose-100 text-rose-800 rounded text-[8px] font-black tracking-wider uppercase font-space animate-pulse">
+                      REQUIRED
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-1">
+                  <div className={`text-4xl font-black tracking-tight font-outfit ${
+                    isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
+                  }`}>
+                    {formatDigitalTime(studyDebt)}
+                  </div>
+                  <p className="text-[10px] text-zinc-500 font-medium leading-normal">
+                    {activeTimer === 'langflix'
+                      ? '공부 시간을 측정 중입니다... (누르면 정지)'
+                      : isDebtCleared 
+                        ? '완벽합니다! 오늘의 소셜 빚을 모두 갚았습니다.' 
+                        : '영어 공부(랭플릭스)가 밀려있습니다.'
+                    }
+                  </p>
+                </div>
               </div>
 
-              <div className="space-y-1">
-                <div className={`text-4xl font-black tracking-tight font-outfit ${
-                  isDebtCleared ? 'text-emerald-600' : activeTimer === 'langflix' ? 'text-emerald-700' : 'text-rose-600'
-                }`}>
-                  {formatDigitalTime(studyDebt)}
-                </div>
-                <p className="text-[11px] text-zinc-500 font-medium leading-relaxed">
-                  {activeTimer === 'langflix'
-                    ? '공부 시간을 측정 중입니다... (누르면 정지)'
-                    : isDebtCleared 
-                      ? '완벽합니다! 오늘의 소셜 빚을 모두 갚았습니다.' 
-                      : '영어 공부(랭플릭스)가 밀려있습니다. (누르면 측정 시작)'
+              {/* 1:1 Langflix Shortcut App Icon */}
+              <a
+                href="https://langflix.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (activeTimer !== 'langflix') {
+                    setActiveTimer('langflix');
                   }
-                </p>
-              </div>
+                }}
+                className="w-[130px] h-[130px] shrink-0 rounded-2xl bg-[#E16539] flex flex-col items-center justify-center text-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] active:scale-95 cursor-pointer relative group overflow-hidden"
+                title="랭플릭스 바로가기 (공부 자동 시작)"
+              >
+                {/* Glossy light effect */}
+                <div className="absolute inset-0 bg-gradient-to-b from-white/25 via-white/5 to-transparent pointer-events-none" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-transparent via-white/15 to-transparent skew-x-12 translate-x-[-100%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-out" />
+                
+                {/* Langflix Custom Cute Character SVG based on provided image */}
+                <svg viewBox="0 0 100 100" className="w-[100px] h-[100px] drop-shadow-[0_4px_10px_rgba(0,0,0,0.25)]" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Stripes (hair/waves) on top-right */}
+                  <path d="M 46 17 C 59 19, 74 29, 80 43" stroke="black" strokeWidth="4.8" strokeLinecap="round" />
+                  <path d="M 53 13 C 68 16, 83 28, 88 45" stroke="black" strokeWidth="4.8" strokeLinecap="round" />
+                  <path d="M 62 10 C 80 14, 93 28, 95 48" stroke="black" strokeWidth="4.8" strokeLinecap="round" />
+
+                  {/* Character Body (chubby black play button/pebble) */}
+                  <path d="M 28 32
+                           C 21 44, 19 61, 28 72
+                           C 37 83, 61 83, 71 72
+                           C 79 61, 77 44, 67 29
+                           C 57 14, 37 17, 28 32 Z" 
+                        fill="black" />
+
+                  {/* Left Eye */}
+                  <circle cx="41.5" cy="51.5" r="10" fill="white" />
+                  <circle cx="42.5" cy="51.5" r="5.2" fill="black" />
+                  <circle cx="41" cy="49.5" r="2" fill="white" />
+
+                  {/* Right Eye */}
+                  <circle cx="61.5" cy="51.5" r="10" fill="white" />
+                  <circle cx="60.5" cy="51.5" r="5.2" fill="black" />
+                  <circle cx="59" cy="49.5" r="2" fill="white" />
+                </svg>
+              </a>
             </div>
 
             {/* 2. Individual App Breakdowns */}
