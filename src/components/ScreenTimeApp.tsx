@@ -33,7 +33,8 @@ export default function ScreenTimeApp({
   const totalSocialTime = settings.instagramTime + settings.twitterTime;
   
   // Study debt calculation based on exact user's formula: (Instagram time + Twitter time) - Langflix study time
-  const studyDebt = Math.max(0, totalSocialTime - settings.langflixTime);
+  // Allows negative values to represent credit (studying first or studying more than social media use)
+  const studyDebt = totalSocialTime - settings.langflixTime;
   const isDebtCleared = studyDebt <= 0;
 
   // Slice the most recent 5 past days from history and reverse them so that left-to-right goes from oldest to newest, then append today's record at the end
@@ -113,23 +114,41 @@ export default function ScreenTimeApp({
                   <p className="text-[9px] text-zinc-500 font-semibold leading-none truncate">
                     {activeTimer === 'langflix'
                       ? '공부 시간을 측정 중입니다...'
-                      : isDebtCleared 
-                        ? '완벽합니다! 오늘의 소셜 빚을 모두 갚았습니다.' 
-                        : '영어 공부(랭플릭스)가 밀려있습니다.'
+                      : studyDebt < 0
+                        ? '초과 공부 축적! 소셜 미디어 여유 확보'
+                        : isDebtCleared 
+                          ? '완벽합니다! 오늘의 소셜 빚을 모두 갚았습니다.' 
+                          : '영어 공부(랭플릭스)가 밀려있습니다.'
                     }
                   </p>
                 </div>
               </div>
-
+ 
               {/* 1:1 Langflix Shortcut App Icon */}
               <a
                 href="https://apps.apple.com/kr/app/%EB%9E%AD%ED%94%8C%EB%A6%AD%EC%8A%A4-%EC%98%81%EC%96%B4%EA%B3%B5%EB%B6%80-%EC%98%81%EC%96%B4%ED%9A%8C%ED%99%94-%EC%98%81%EB%8B%A8%EC%96%B4-%EB%8B%A8%EC%96%B4%EC%9E%A5/id6739905184"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => {
+                  e.preventDefault();
                   if (activeTimer !== 'langflix') {
                     setActiveTimer('langflix');
                   }
+                  
+                  // Custom URL Scheme deep-linking launch attempt for iOS native application.
+                  const customScheme = "langflix://";
+                  const appStoreUrl = "https://apps.apple.com/kr/app/%EB%9E%AD%ED%94%8C%EB%A6%AD%EC%8A%A4-%EC%98%81%EC%96%B4%EA%B3%B5%EB%B6%80-%EC%98%81%EC%96%B4%ED%9A%8C%ED%99%94-%EC%98%81%EB%8B%A8%EC%96%B4-%EB%8B%A8%EC%96%B4%EC%9E%A5/id6739905184";
+                  
+                  const start = Date.now();
+                  window.location.href = customScheme;
+                  
+                  // Fallback: If the browser is still active after 1.2s (indicating the app wasn't installed or couldn't launch),
+                  // we open the App Store URL in a new tab.
+                  setTimeout(() => {
+                    if (Date.now() - start < 1500) {
+                      window.open(appStoreUrl, '_blank');
+                    }
+                  }, 1200);
                 }}
                 className="w-24 h-24 shrink-0 rounded-2xl bg-[#E16539] flex flex-col items-center justify-center text-white shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 hover:scale-[1.04] active:scale-95 cursor-pointer relative group overflow-hidden"
                 title="랭플릭스 바로가기 (공부 자동 시작)"

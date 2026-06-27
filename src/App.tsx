@@ -226,7 +226,7 @@ export default function App() {
   // Computed metrics
   const totalSocial = settings.instagramTime + settings.twitterTime;
   const targetStudyTime = Math.floor(totalSocial * settings.studyGoalRatio);
-  const studyDebt = Math.max(0, targetStudyTime - settings.langflixTime);
+  const studyDebt = targetStudyTime - settings.langflixTime;
   const isGoalExceeded = totalSocial > settings.targetLimit;
   const currentResetHour = 5;
 

@@ -70,15 +70,18 @@ export function formatDuration(seconds: number): string {
 
 /**
  * Formats seconds into digital style "HH:MM:SS" always (including hours)
+ * Supports negative numbers by prepending a minus sign.
  */
 export function formatDigitalTime(seconds: number): string {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
+  const isNegative = seconds < 0;
+  const absSeconds = Math.abs(seconds);
+  const h = Math.floor(absSeconds / 3600);
+  const m = Math.floor((absSeconds % 3600) / 60);
+  const s = Math.floor(absSeconds % 60);
   
   const hh = h.toString().padStart(2, '0');
   const mm = m.toString().padStart(2, '0');
   const ss = s.toString().padStart(2, '0');
   
-  return `${hh}:${mm}:${ss}`;
+  return `${isNegative ? '-' : ''}${hh}:${mm}:${ss}`;
 }
